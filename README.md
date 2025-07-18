@@ -1,22 +1,21 @@
-
 # Sikkim Pay Fixation Calculator
 
 This repository contains a web-based calculator designed to assist Sikkim Government employees in understanding and calculating their pay fixation upon promotion, as per Rule 12 of the Sikkim Government Services (Revised Pay) Rules, 2018. It also includes functionality to determine the date of the next increment based on Rule 10.
 
 ## Table of Contents
 
-* [About](https://www.google.com/search?q=%23about "null")
-* [Features](https://www.google.com/search?q=%23features "null")
-* [How It Works](https://www.google.com/search?q=%23how-it-works "null")
-* [Usage](https://www.google.com/search?q=%23usage "null")
-* [Pay Matrix Data](https://www.google.com/search?q=%23pay-matrix-data "null")
-* [Contributing](https://www.google.com/search?q=%23contributing "null")
-* [License](https://www.google.com/search?q=%23license "null")
-* [Deployment](https://www.google.com/search?q=%23deployment "null")
+* [About]()
+* [Features]( "null")
+* [How It Works]( "null")
+* [Usage]( "null")
+* [Pay Matrix Data]( "null")
+* [Contributing]( "null")
+* [License]( "null")
+* [Deployment]( "null")
 
 ## About
 
-The Sikkim Pay Fixation Calculator aims to simplify the complex process of pay fixation after promotion and the determination of the next increment date. It provides a user-friendly interface to input existing pay details, the new promoted level, and the date of the last appointment/promotion/upgradation, offering calculations based on the rules outlined in the Sikkim Government Services (Revised Pay) Rules, 2018.
+The [Sikkim Pay Fixation Calculator](https://phuchungbhutia.github.io/payfix/) aims to simplify the complex process of pay fixation after promotion and the determination of the next increment date. It provides a user-friendly interface to input existing pay details, the new promoted level, and the date of the last appointment/promotion/upgradation, offering calculations based on the rules outlined in the Sikkim Government Services (Revised Pay) Rules, 2018.
 
 This tool helps employees quickly estimate their revised pay and understand their next increment date, ensuring transparency and ease of understanding.
 

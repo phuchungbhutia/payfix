@@ -321,9 +321,9 @@
 
 
         function calculatePay() {
-            const existingLevel = document.getElementById('existingLevel').value;
+            const existingLevel = parseInt(document.getElementById('existingLevel').value);
             const existingBasicPay = parseInt(document.getElementById('existingBasicPay').value); // Now from select
-            const promotedLevel = document.getElementById('promotedLevel').value;
+            const promotedLevel = parseInt(document.getElementById('promotedLevel').value);
             const fixationOption = document.querySelector('input[name="fixationOption"]:checked').value;
             const lastEventDateStr = document.getElementById('lastEventDate').value; // Get the date string
 
@@ -346,6 +346,13 @@
 
             if (!promotedLevel) {
                 errorMessageDiv.textContent = 'Please select the promoted level.';
+                errorMessageDiv.classList.remove('hidden');
+                return;
+            }
+
+            // New validation: Promoted Level must be greater than Existing Level
+            if (promotedLevel <= existingLevel) {
+                errorMessageDiv.textContent = 'The promoted level must be greater than the existing level.';
                 errorMessageDiv.classList.remove('hidden');
                 return;
             }

@@ -140,14 +140,16 @@
 
         <div class="form-group">
             <label for="existingLevel">Existing Level in the revised pay structure:</label>
-            <select id="existingLevel" class="rounded-lg">
+            <select id="existingLevel" class="rounded-lg" onchange="populateExistingBasicPay()">
                 <!-- Options will be populated by JavaScript -->
             </select>
         </div>
 
         <div class="form-group">
             <label for="existingBasicPay">Existing Basic Pay in the revised pay structure:</label>
-            <input type="number" id="existingBasicPay" placeholder="Enter your existing basic pay" class="rounded-lg">
+            <select id="existingBasicPay" class="rounded-lg">
+                <!-- Options will be populated dynamically based on existingLevel selection -->
+            </select>
         </div>
 
         <div class="form-group">
@@ -230,6 +232,27 @@
                 option2.textContent = `Level ${i}`;
                 promotedLevelSelect.appendChild(option2);
             }
+            // After populating levels, populate the basic pay for the initial selected level
+            populateExistingBasicPay();
+        }
+
+        // Populate the Existing Basic Pay dropdown based on the selected Existing Level
+        function populateExistingBasicPay() {
+            const existingLevel = document.getElementById('existingLevel').value;
+            const existingBasicPaySelect = document.getElementById('existingBasicPay');
+
+            // Clear existing options
+            existingBasicPaySelect.innerHTML = '<option value="">Select Basic Pay</option>';
+
+            const levelMatrix = payMatrix[existingLevel];
+            if (levelMatrix) {
+                levelMatrix.forEach(pay => {
+                    const option = document.createElement('option');
+                    option.value = pay;
+                    option.textContent = pay.toLocaleString('en-IN');
+                    existingBasicPaySelect.appendChild(option);
+                });
+            }
         }
 
         // Find the next higher cell in a given level's pay matrix
@@ -271,18 +294,25 @@
 
             // Rule 10(2) logic
             // Period between 2nd day of January and 1st day of July (both inclusive)
-            if ((eventMonth === 0 && eventDay >= 2) || (eventMonth > 0 && eventMonth < 6) || (eventMonth === 6 && eventDay === 1)) {
+            // Months: Jan (0), Feb (1), Mar (2), Apr (3), May (4), Jun (5), Jul (6)
+            if (
+                (eventMonth === 0 && eventDay >= 2) || // Jan 2nd onwards
+                (eventMonth > 0 && eventMonth < 6) ||  // Feb to June
+                (eventMonth === 6 && eventDay === 1)    // July 1st
+            ) {
                 nextIncrementMonth = 0; // January
-                nextIncrementYear++; // Next year
+                nextIncrementYear++; // Increment in the next year's January
             }
             // Period between 2nd day of July and 1st day of January (both inclusive)
             else {
                 nextIncrementMonth = 6; // July
-                // If the event is in the current year, the increment is in the next July.
+                // If the event is in the current year (July 2nd to Dec 31st), the increment is in the next year's July.
                 // If the event is in the previous year (e.g., Dec 2023 for July 2024 increment), year remains same.
-                if (eventMonth > 6 || (eventMonth === 6 && eventDay >= 2)) {
+                if (eventMonth > 6 || (eventMonth === 6 && eventDay >= 2)) { // July 2nd onwards to Dec
                     nextIncrementYear++;
                 }
+                // Special case for Jan 1st event: increment is July 1st of the *same* year.
+                // This is covered by the 'else' block's default `nextIncrementYear` if eventMonth is 0 and eventDay is 1.
             }
 
             const nextIncrementFullDate = new Date(nextIncrementYear, nextIncrementMonth, nextIncrementDay);
@@ -292,7 +322,7 @@
 
         function calculatePay() {
             const existingLevel = document.getElementById('existingLevel').value;
-            const existingBasicPay = parseInt(document.getElementById('existingBasicPay').value);
+            const existingBasicPay = parseInt(document.getElementById('existingBasicPay').value); // Now from select
             const promotedLevel = document.getElementById('promotedLevel').value;
             const fixationOption = document.querySelector('input[name="fixationOption"]:checked').value;
             const lastEventDateStr = document.getElementById('lastEventDate').value; // Get the date string
@@ -308,8 +338,14 @@
             nextIncrementDateSpan.textContent = '';
 
             // Input validation
-            if (!existingBasicPay || isNaN(existingBasicPay) || existingBasicPay <= 0) {
-                errorMessageDiv.textContent = 'Please enter a valid existing basic pay.';
+            if (!existingLevel || !existingBasicPay || isNaN(existingBasicPay) || existingBasicPay <= 0) {
+                errorMessageDiv.textContent = 'Please select a valid existing level and basic pay.';
+                errorMessageDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (!promotedLevel) {
+                errorMessageDiv.textContent = 'Please select the promoted level.';
                 errorMessageDiv.classList.remove('hidden');
                 return;
             }
@@ -323,14 +359,10 @@
             const existingLevelMatrix = payMatrix[existingLevel];
             const promotedLevelMatrix = payMatrix[promotedLevel];
 
-            if (!existingLevelMatrix || !promotedLevelMatrix) {
-                errorMessageDiv.textContent = 'Invalid Level selected. Please choose from the available levels.';
-                errorMessageDiv.classList.remove('hidden');
-                return;
-            }
-
+            // Basic pay validation is now mostly handled by dynamic population,
+            // but a final check ensures no manipulation or empty selection.
             if (!existingLevelMatrix.includes(existingBasicPay)) {
-                errorMessageDiv.textContent = `Existing Basic Pay ${existingBasicPay} is not valid for Level ${existingLevel}. Please enter a valid pay from the Level ${existingLevel} matrix.`;
+                errorMessageDiv.textContent = `Selected Existing Basic Pay ${existingBasicPay} is not valid for Level ${existingLevel}. Please re-select.`;
                 errorMessageDiv.classList.remove('hidden');
                 return;
             }
@@ -350,7 +382,7 @@
                 // Rule 12(2): Fixation from date of next increment
                 // On the date of promotion, he shall be placed at a cell equal to the existing pay at the higher Level to which promoted, without adding any increment.
                 // If no such cell is available in the Level to which promoted, he shall be placed at the next higher Cell in that Level.
-                let payOnPromotionDate = findNextHigherCell(promotedLevelMatrix, existingBasicPay);
+                // let payOnPromotionDate = findNextHigherCell(promotedLevelMatrix, existingBasicPay); // This intermediate step is not used for final calculation in Rule 12(2)
 
                 // Further, re-fixation will be done on the date of his next increment.
                 // On that day he shall be granted two increments calculated separately;

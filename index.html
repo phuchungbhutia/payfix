@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sikkim Pay Fixation Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            box-sizing: border-box;
+            border: 1px solid #e0e0e0;
+        }
+        h1 {
+            color: #1a202c;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        select, input[type="number"], input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #2d3748;
+            background-color: #f7fafc;
+            transition: border-color 0.2s;
+        }
+        select:focus, input[type="number"]:focus, input[type="date"]:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+        button:hover {
+            background-color: #4f46e5;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(99, 102, 241, 0.3);
+        }
+        .result-box {
+            margin-top: 30px;
+            padding: 25px;
+            background-color: #eef2ff;
+            border: 1px solid #a5b4fc;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: #4338ca;
+        }
+        .result-box span {
+            color: #1e3a8a;
+            font-weight: 700;
+        }
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .option-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #2d3748;
+        }
+        .option-group input[type="radio"] {
+            width: auto;
+            margin-bottom: 0;
+            accent-color: #6366f1;
+        }
+        .error-message {
+            color: #ef4444;
+            margin-top: -10px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .info-message {
+            background-color: #dbeafe;
+            color: #1e40af;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            line-height: 1.5;
+            border: 1px solid #93c5fd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sikkim Pay Fixation Calculator (Rule 12 & 10)</h1>
+
+        <div class="info-message">
+            This calculator helps determine pay fixation on promotion based on Rule 12 and the date of next increment based on Rule 10 of the Sikkim Government Services (Revised Pay) Rules, 2018.
+            Choose your existing pay details, the promoted level, the fixation option, and the date of your last appointment/promotion/upgradation.
+        </div>
+
+        <div class="form-group">
+            <label for="existingLevel">Existing Level in the revised pay structure:</label>
+            <select id="existingLevel" class="rounded-lg">
+                <!-- Options will be populated by JavaScript -->
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="existingBasicPay">Existing Basic Pay in the revised pay structure:</label>
+            <input type="number" id="existingBasicPay" placeholder="Enter your existing basic pay" class="rounded-lg">
+        </div>
+
+        <div class="form-group">
+            <label for="promotedLevel">Granted promotion in Next Level:</label>
+            <select id="promotedLevel" class="rounded-lg">
+                <!-- Options will be populated by JavaScript -->
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Option for Pay Fixation:</label>
+            <div class="option-group">
+                <label>
+                    <input type="radio" name="fixationOption" value="dateOfPromotion" checked>
+                    Fixation from date of promotion
+                </label>
+                <label>
+                    <input type="radio" name="fixationOption" value="nextIncrementDate">
+                    Fixation from date of next increment
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="lastEventDate">Date of last Appointment/Promotion/Upgradation:</label>
+            <input type="date" id="lastEventDate" class="rounded-lg">
+        </div>
+
+        <div id="errorMessage" class="error-message hidden"></div>
+
+        <button onclick="calculatePay()">Calculate Pay & Next Increment</button>
+
+        <div id="result" class="result-box hidden">
+            <p>Calculated Pay in Promoted Level: <span id="calculatedPay"></span></p>
+            <p>Date of Next Increment: <span id="nextIncrementDate"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Pay Matrix data extracted from the provided document
+        const payMatrix = {
+            "1": [15200, 15700, 16200, 16700, 17200, 17700, 18200, 18700, 19300, 19900, 20500, 21100, 21700, 22400, 23100, 23800, 24500, 25200, 26000, 26800, 27600, 28400, 29300, 30200, 31100, 32000, 33000, 34000, 35000, 36100, 37200, 38300, 39400, 40600, 41800, 43100, 44400, 45700, 47100, 48500],
+            "2": [16200, 16700, 17200, 17700, 18200, 18700, 19300, 19900, 20500, 21100, 21700, 22400, 23100, 23800, 24500, 25200, 26000, 26800, 27600, 28400, 29300, 30200, 31100, 32000, 33000, 34000, 35000, 36100, 37200, 38300, 39400, 40600, 41800, 43100, 44400, 45700, 47100, 48500, 50000, 51500],
+            "3": [19300, 19900, 20500, 21100, 21700, 22400, 23100, 23800, 24500, 25200, 26000, 26800, 27600, 28400, 29300, 30200, 31100, 32000, 33000, 34000, 35000, 36100, 37200, 38300, 39400, 40600, 41800, 43100, 44400, 45700, 47100, 48500, 50000, 51500, 53000, 54600, 56200, 57900, 59600, 61400],
+            "4": [18000, 18500, 19100, 19700, 20300, 20900, 21500, 22100, 22800, 23500, 24200, 24900, 25600, 26400, 27200, 28000, 28800, 29700, 30600, 31500, 32400, 33400, 34400, 35400, 36500, 37600, 38700, 39900, 41100, 42300, 43600, 44900, 46200, 47600, 49000, 50500, 52000, 53600, 55200, 56900],
+            "5": [19400, 20000, 20600, 21200, 21800, 22500, 23200, 23900, 24600, 25300, 26100, 26900, 27700, 28500, 29400, 30300, 31200, 32100, 33100, 34100, 35100, 36200, 37300, 38400, 39600, 40800, 42000, 43300, 44600, 45900, 47300, 48700, 50200, 51700, 53300, 54900, 56500, 58200, 59900, 61700],
+            "6": [20300, 20900, 21500, 22100, 22800, 23500, 24200, 24900, 25600, 26400, 27200, 28000, 28800, 29700, 30600, 31500, 32400, 33400, 34400, 35400, 36500, 37600, 38700, 39900, 41100, 42300, 43600, 44900, 46200, 47600, 49000, 50500, 52000, 53600, 55200, 56900, 58600, 60400, 62200, 64100],
+            "7": [21700, 22400, 23100, 23800, 24500, 25200, 26000, 26800, 27600, 28400, 29300, 30200, 31100, 32000, 33000, 34000, 35000, 36100, 37200, 38300, 39400, 40600, 41800, 43100, 44400, 45700, 47100, 48500, 50000, 51500, 53000, 54600, 56200, 57900, 59600, 61400, 63200, 65100, 67100, 69100],
+            "8": [22800, 23500, 24200, 24900, 25600, 26400, 27200, 28000, 28800, 29700, 30600, 31500, 32400, 33400, 34400, 35400, 36500, 37600, 38700, 39900, 41100, 42300, 43600, 44900, 46200, 47600, 49000, 50500, 52000, 53600, 55200, 56900, 58600, 60400, 62200, 64100, 66000, 68000, 70000, 72100],
+            "9": [25400, 26200, 27000, 27800, 28600, 29500, 30400, 31300, 32200, 33200, 34200, 35200, 36300, 37400, 38500, 39700, 40900, 42100, 43400, 44700, 46000, 47400, 48800, 50300, 51800, 53400, 55000, 56700, 58400, 60200, 62000, 63900, 65800, 67800, 69800, 71900, 74100, 76300, 78600, 81000],
+            "10": [30200, 31100, 32000, 33000, 34000, 35000, 36100, 37200, 38300, 39400, 40600, 41800, 43100, 44400, 45700, 47100, 48500, 50000, 51500, 53000, 54600, 56200, 57900, 59600, 61400, 63200, 65100, 67100, 69100, 71200, 73300, 75500, 77800, 80100, 82500, 85000, 87600, 90200, 92900, 95700],
+            "11": [33700, 34700, 35700, 36800, 37900, 39000, 40200, 41400, 42600, 43900, 45200, 46600, 48000, 49400, 50900, 52400, 54000, 55600, 57300, 59000, 60800, 62600, 64500, 66400, 68400, 70500, 72600, 74800, 77000, 79300, 81700, 84200, 86700, 89300, 92000, 94800, 97600, 100500, 103500, 106600],
+            "12": [37100, 38200, 39300, 40500, 41700, 43000, 44300, 45600, 47000, 48400, 49900, 51400, 52900, 54500, 56100, 57800, 59500, 61300, 63100, 65000, 67000, 69000, 71100, 73200, 75400, 77700, 80000, 82400, 84900, 87400, 90000, 92700, 95500, 98400, 101400, 104400, 107500, 110700, 114000, 117400],
+            "13": [37600, 38700, 39900, 41100, 42300, 43600, 44900, 46200, 47600, 49000, 50500, 52000, 53600, 55200, 56900, 58600, 60400, 62200, 64100, 66000, 68000, 70000, 72100, 74300, 76500, 78800, 81200, 83600, 86100, 88700, 91400, 94100, 96900, 99800, 102800, 105900, 109100, 112400, 115800, 119300],
+            "14": [39100, 40300, 41500, 42700, 44000, 45300, 46700, 48100, 49500, 51000, 52500, 54100, 55700, 57400, 59100, 60900, 62700, 64600, 66500, 68500, 70600, 72700, 74900, 77100, 79400, 81800, 84300, 86800, 89400, 92100, 94900, 97700, 100600, 103600, 106700, 109900, 113200, 116600, 120100, 123700],
+            "15": [46300, 47700, 49100, 50600, 52100, 53700, 55300, 57000, 58700, 60500, 62300, 64200, 66100, 68100, 70100, 72200, 74400, 76600, 78900, 81300, 83700, 86200, 88800, 91500, 94200, 97000, 99900, 102900, 106000, 109200, 112500, 115900, 119400, 123000, 126700, 130500, 134400, 138400, 142600, 146900],
+            "16": [49700, 51200, 52700, 54300, 55900, 57600, 59300, 61100, 62900, 64800, 66700, 68700, 70800, 72900, 75100, 77400, 79700, 82100, 84600, 87100, 89700, 92400, 95200, 98100, 101000, 104000, 107100, 110300, 113600, 117000, 120500, 124100, 127800, 131600, 135500, 139600, 143800, 148100, 152500, 157100],
+            "17": [56000, 57700, 59400, 61200, 63000, 64900, 66800, 68800, 70900, 73000, 75200, 77500, 79800, 82200, 84700, 87200, 89800, 92500, 95300, 98200, 101100, 104100, 107200, 110400, 113700, 117100, 120600, 124200, 127900, 131700, 135700, 139800, 144000, 148300, 152800, 157400, 162100, 167000, 172000, 177200],
+            "18": [65000, 67000, 69000, 71100, 73200, 75400, 77700, 80000, 82400, 84900, 87400, 90000, 92700, 95500, 98400, 101400, 104400, 107500, 110700, 114000, 117400, 120900, 124500, 128200, 132000, 136000, 140100, 144300, 148600, 153100, 157700, 162400, 167300, 172300, 177500, 182800, 188300, 194000, 199800, 205800],
+            "19": [71100, 73200, 75400, 77700, 80000, 82400, 84900, 87400, 90000, 92700, 95500, 98400, 101400, 104400, 107500, 110700, 114000, 117400, 120900, 124500, 128200, 132000, 136000, 140100, 144300, 148600, 153100, 157700, 162400, 167300, 172300, 177500, 182800, 188300, 194000, 199800, 205800, 212000, 218400, 225000],
+            "20": [83700, 86200, 88800, 91500, 94200, 97000, 99900, 102900, 106000, 109200, 112500, 115900, 119400, 123000, 126700, 130500, 134400, 138400, 142600, 146900, 151300, 155800, 160500, 165300, 170300, 175400, 180700, 186100, 191700, 197500, 203400, 209500, 215800, 222300, 229000, 235900, 243000, 250300, 257800, 265500],
+            "21": [105400, 108600, 111900, 115300, 118800, 122400, 126100, 129900, 133800, 137800, 141900, 146200, 150600, 155100, 159800, 164600, 169500, 174600, 179800], // Max 19 entries for this level
+            "22": [120500, 120500, 120500, 120500, 120500, 120500, 120500, 120500, 120500, 120500, 120500, 120500, 120500, 120500, 120500, 120500, 120500, 120500, 120500], // Max 19 entries for this level
+            "23": [124700, 124700, 124700, 124700, 124700, 124700, 124700, 124700, 124700, 124700, 124700, 124700, 124700, 124700, 124700, 124700, 124700, 124700, 124700] // Max 19 entries for this level
+        };
+
+        // Populate the level dropdowns
+        function populateLevels() {
+            const existingLevelSelect = document.getElementById('existingLevel');
+            const promotedLevelSelect = document.getElementById('promotedLevel');
+
+            for (let i = 1; i <= 23; i++) {
+                const option1 = document.createElement('option');
+                option1.value = i;
+                option1.textContent = `Level ${i}`;
+                existingLevelSelect.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = i;
+                option2.textContent = `Level ${i}`;
+                promotedLevelSelect.appendChild(option2);
+            }
+        }
+
+        // Find the next higher cell in a given level's pay matrix
+        function findNextHigherCell(levelMatrix, targetPay) {
+            for (const pay of levelMatrix) {
+                if (pay >= targetPay) {
+                    return pay;
+                }
+            }
+            // If targetPay is higher than all cells in the level, return the highest cell
+            return levelMatrix[levelMatrix.length - 1];
+        }
+
+        // Get the next incremented pay in the current level
+        function getNextIncrementPay(currentLevel, currentPay) {
+            const levelMatrix = payMatrix[currentLevel];
+            const currentIndex = levelMatrix.indexOf(currentPay);
+
+            if (currentIndex !== -1 && currentIndex < levelMatrix.length - 1) {
+                return levelMatrix[currentIndex + 1];
+            }
+            // If current pay is the last cell or not found, return current pay (no increment possible)
+            return currentPay;
+        }
+
+        // Function to calculate the date of next increment based on Rule 10
+        function calculateNextIncrementDate(eventDateStr) {
+            if (!eventDateStr) {
+                return "N/A (Please provide a date)";
+            }
+
+            const eventDate = new Date(eventDateStr);
+            const eventMonth = eventDate.getMonth(); // 0-11 (Jan-Dec)
+            const eventDay = eventDate.getDate();
+
+            let nextIncrementYear = eventDate.getFullYear();
+            let nextIncrementMonth; // 0 for Jan, 6 for July
+            let nextIncrementDay = 1;
+
+            // Rule 10(2) logic
+            // Period between 2nd day of January and 1st day of July (both inclusive)
+            if ((eventMonth === 0 && eventDay >= 2) || (eventMonth > 0 && eventMonth < 6) || (eventMonth === 6 && eventDay === 1)) {
+                nextIncrementMonth = 0; // January
+                nextIncrementYear++; // Next year
+            }
+            // Period between 2nd day of July and 1st day of January (both inclusive)
+            else {
+                nextIncrementMonth = 6; // July
+                // If the event is in the current year, the increment is in the next July.
+                // If the event is in the previous year (e.g., Dec 2023 for July 2024 increment), year remains same.
+                if (eventMonth > 6 || (eventMonth === 6 && eventDay >= 2)) {
+                    nextIncrementYear++;
+                }
+            }
+
+            const nextIncrementFullDate = new Date(nextIncrementYear, nextIncrementMonth, nextIncrementDay);
+            return nextIncrementFullDate.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+
+        function calculatePay() {
+            const existingLevel = document.getElementById('existingLevel').value;
+            const existingBasicPay = parseInt(document.getElementById('existingBasicPay').value);
+            const promotedLevel = document.getElementById('promotedLevel').value;
+            const fixationOption = document.querySelector('input[name="fixationOption"]:checked').value;
+            const lastEventDateStr = document.getElementById('lastEventDate').value; // Get the date string
+
+            const errorMessageDiv = document.getElementById('errorMessage');
+            const resultDiv = document.getElementById('result');
+            const calculatedPaySpan = document.getElementById('calculatedPay');
+            const nextIncrementDateSpan = document.getElementById('nextIncrementDate');
+
+            errorMessageDiv.classList.add('hidden');
+            resultDiv.classList.add('hidden');
+            calculatedPaySpan.textContent = '';
+            nextIncrementDateSpan.textContent = '';
+
+            // Input validation
+            if (!existingBasicPay || isNaN(existingBasicPay) || existingBasicPay <= 0) {
+                errorMessageDiv.textContent = 'Please enter a valid existing basic pay.';
+                errorMessageDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (!lastEventDateStr) {
+                errorMessageDiv.textContent = 'Please enter the date of last Appointment/Promotion/Upgradation.';
+                errorMessageDiv.classList.remove('hidden');
+                return;
+            }
+
+            const existingLevelMatrix = payMatrix[existingLevel];
+            const promotedLevelMatrix = payMatrix[promotedLevel];
+
+            if (!existingLevelMatrix || !promotedLevelMatrix) {
+                errorMessageDiv.textContent = 'Invalid Level selected. Please choose from the available levels.';
+                errorMessageDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (!existingLevelMatrix.includes(existingBasicPay)) {
+                errorMessageDiv.textContent = `Existing Basic Pay ${existingBasicPay} is not valid for Level ${existingLevel}. Please enter a valid pay from the Level ${existingLevel} matrix.`;
+                errorMessageDiv.classList.remove('hidden');
+                return;
+            }
+
+            let finalPromotedPay = 0;
+
+            if (fixationOption === 'dateOfPromotion') {
+                // Rule 12(1): Fixation from date of promotion
+                // One increment shall be given in the Level from which the employee is promoted
+                const payAfterOneIncrement = getNextIncrementPay(existingLevel, existingBasicPay);
+
+                // Place at a cell equal to the figure so arrived at in the Level of the post to which promoted
+                // If no such cell is available, placed at the next higher Cell in that Level.
+                finalPromotedPay = findNextHigherCell(promotedLevelMatrix, payAfterOneIncrement);
+
+            } else if (fixationOption === 'nextIncrementDate') {
+                // Rule 12(2): Fixation from date of next increment
+                // On the date of promotion, he shall be placed at a cell equal to the existing pay at the higher Level to which promoted, without adding any increment.
+                // If no such cell is available in the Level to which promoted, he shall be placed at the next higher Cell in that Level.
+                let payOnPromotionDate = findNextHigherCell(promotedLevelMatrix, existingBasicPay);
+
+                // Further, re-fixation will be done on the date of his next increment.
+                // On that day he shall be granted two increments calculated separately;
+                // one annual increment and second increment on account of promotion
+                // in the Level from which the employee is promoted.
+
+                // Calculate pay after one annual increment in existing level
+                const payAfterAnnualIncrement = getNextIncrementPay(existingLevel, existingBasicPay);
+
+                // Calculate pay after another (promotional) increment in existing level
+                const payAfterPromotionalIncrement = getNextIncrementPay(existingLevel, payAfterAnnualIncrement);
+
+                // Thereafter his pay in the Level shall be fixed at a cell in the higher Level equal to the figure so arrived at
+                // and if no such cell is available in the Level, he shall be placed at the next higher Cell in that Level.
+                finalPromotedPay = findNextHigherCell(promotedLevelMatrix, payAfterPromotionalIncrement);
+            }
+
+            // Calculate and display next increment date
+            const calculatedNextIncrementDate = calculateNextIncrementDate(lastEventDateStr);
+
+            calculatedPaySpan.textContent = `₹ ${finalPromotedPay.toLocaleString('en-IN')}`;
+            nextIncrementDateSpan.textContent = calculatedNextIncrementDate;
+            resultDiv.classList.remove('hidden');
+        }
+
+        // Initialize the calculator when the window loads
+        window.onload = populateLevels;
+    </script>
+</body>
+</html>
